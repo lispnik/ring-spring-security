@@ -33,8 +33,16 @@
 (defn security-context []
   (org.springframework.security.core.context.SecurityContextHolder/getContext))
 
+(defn wrap-reload-spring [app]
+  "Reload the Spring application context on every HTTP request"
+  (fn [req]
+    (let [application-context (application-context req)]
+      (.refresh application-context)
+      (app req))))
+
 (def app
   (-> (handler/site main-routes)
+;      (wrap-reload-spring)
       (wrap-reload '(ring-spring-security.core))
       (wrap-stacktrace)))
 
