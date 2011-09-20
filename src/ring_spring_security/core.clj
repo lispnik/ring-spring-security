@@ -12,15 +12,18 @@
   (:use hiccup.core)
   (:use hiccup.page-helpers))
 
-(declare index-html example-html)
+(declare index-html example-html messages-html)
 
 (defroutes main-routes
   (GET "/"      req (index-html req))
   (GET "/admin" req (example-html req))
   (GET "/user"  req (example-html req))
   (GET "/other" req (example-html req))
+  (GET "/messages" req (messages-html req))
   (route/resources "/")
   (route/not-found "Page not found"))
+
+;Some general utilities and wrappers
 
 (defn application-context
   ([req]
@@ -33,6 +36,14 @@
 (defn security-context []
   (org.springframework.security.core.context.SecurityContextHolder/getContext))
 
+(defn message [req key & args]
+  (let [context (application-context req)]
+    (.getMessage
+      context
+      (if (keyword? key) (name key) key)
+      (into-array java.lang.Object args)
+      (.getLocale (:servlet-request req)))))
+
 (defn wrap-reload-spring [app]
   "Reload the Spring application context on every HTTP request"
   (fn [req]
@@ -40,9 +51,15 @@
       (.refresh application-context)
       (app req))))
 
+(defn wrap-dump [app]
+  (fn [req]
+    (println req)
+    (app req)))
+
 (def app
   (-> (handler/site main-routes)
-;      (wrap-reload-spring)
+      (wrap-reload-spring)
+      (wrap-dump)
       (wrap-reload '(ring-spring-security.core))
       (wrap-stacktrace)))
 
@@ -70,6 +87,12 @@
      [:li (link-to "/user" "/user")]
      [:li (link-to "/other" "/other")]]))
 
+(defn messages-html [req]
+  (layout
+    [:p "Here's some messages in your locale:"]
+    [:ul
+     [:li (escape-html (message req :greeting "asdf"))]]))
+
 (defn- boot-spring
   "Initialize a Jetty server for Spring and also Spring Security"
   ([server handler context-config-location]
@@ -94,7 +117,7 @@
     {:port 9090
      :join? join?
      :configurator (fn [server]
-                     (boot-spring server #'app "classpath:security.xml"))})]
+                     (boot-spring server #'app "classpath:applicationContext.xml"))})]
   ;this is a hack to get around the handler ring-adapter-jetty forces on us
   (doseq [handler (remove #(= (class %) org.mortbay.jetty.servlet.Context) (seq (.getHandlers server)))]
     (.removeHandler server handler))))
