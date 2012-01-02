@@ -1,13 +1,13 @@
 # ring-spring-security
 
-FIXME: write description
+Sample application demonstrating Spring, Spring Security and Ring integration with Jetty.
 
 ## Usage
 
-FIXME: write
+Start the REPL and follow instructions.
 
 ## License
 
-Copyright (C) 2011 FIXME
+Copyright (C) 2011 Matthew Kennedy <burnsidemk@gmail.com>
 
 Distributed under the Eclipse Public License, the same as Clojure.

@@ -112,16 +112,18 @@
   ([server handler]
     (boot-spring server handler nil)))
 
-(defn boot [join?]
-  (let [server (jetty/run-jetty #'app
-    {:port 9090
-     :join? join?
-     :configurator (fn [server]
-                     (boot-spring server #'app "classpath:applicationContext.xml"))})]
-  ;this is a hack to get around the handler ring-adapter-jetty forces on us
-  (doseq [handler (remove #(= (class %) org.mortbay.jetty.servlet.Context) (seq (.getHandlers server)))]
-    (.removeHandler server handler))))
+(defn boot
+  ([join?]
+     (let [server (jetty/run-jetty
+                   #'app
+                   {:port 9090
+                    :join? join?
+                    :configurator (fn [server]
+                                    (boot-spring server #'app "classpath:applicationContext.xml"))})]
+       ;; this is a hack to get around the handler ring-adapter-jetty forces on us
+       (doseq [handler (remove #(= (class %) org.mortbay.jetty.servlet.Context)
+                               (seq (.getHandlers server)))]
+         (.removeHandler server handler))))
+  ([]
+     (boot false)))
 
-(comment
-  (def jetty (boot true))
-  (.stop jetty))

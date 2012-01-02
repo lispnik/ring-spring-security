@@ -1,5 +1,6 @@
+
 (defproject ring-spring-security "1.0.0-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "Sample application demonstrating Spring, Spring Security and Ring integration with Jetty."
   :dependencies [[org.clojure/clojure "1.2.1"]
                  [ring/ring-core "0.3.11"]
                  [ring/ring-jetty-adapter "0.3.11"]
@@ -11,4 +12,5 @@
                  [org.slf4j/jcl-over-slf4j "1.6.1"]
                  [ch.qos.logback/logback-classic "0.9.29"]]
   :exclusions [commons-logging/commons-logging]
-  :dev-dependencies [[ring/ring-devel "0.3.11"]])
+  :dev-dependencies [[ring/ring-devel "0.3.11"]]
+  :repl-init ring-spring-security.repl-helper)
